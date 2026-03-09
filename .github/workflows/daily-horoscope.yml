@@ -1,0 +1,41 @@
+name: Daily Horoscope Push
+
+on:
+  # 每天北京时间7:40触发 (UTC时间23:40)
+  schedule:
+    - cron: '40 23 * * *'
+  
+  # 允许手动触发测试
+  workflow_dispatch:
+    inputs:
+      test:
+        description: '是否为测试运行'
+        required: false
+        default: 'false'
+
+jobs:
+  push-horoscope:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 安装依赖
+        run: npm ci
+      
+      - name: 运行运势推送
+        env:
+          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
+        run: npm test
+      
+      - name: 发送成功通知（仅手动触发）
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "✅ 手动测试成功！"

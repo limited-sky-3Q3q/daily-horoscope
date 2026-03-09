@@ -1,0 +1,21 @@
+{
+  "name": "daily-horoscope-sender",
+  "version": "1.0.0",
+  "description": "Daily horoscope sender service - sends daily horoscope at 7:40 AM",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "horoscope",
+    "daily",
+    "scheduler"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-cron": "^3.0.3"
+  }
+}
