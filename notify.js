@@ -43,9 +43,10 @@ function consolePush(message) {
  * @param {string} content - 消息内容
  */
 async function serverChanPush(title, content) {
-  // 读取配置文件
+  // 优先使用环境变量（GitHub Actions）
   let sendKey = process.env.SERVERCHAN_SENDKEY;
 
+  // 如果没有环境变量，尝试读取.env文件（本地运行）
   if (!sendKey) {
     try {
       const envFile = join(process.cwd(), '.env');
@@ -60,14 +61,18 @@ async function serverChanPush(title, content) {
   }
 
   if (!sendKey || sendKey === 'YOUR_SENDKEY_HERE') {
-    console.warn('⚠️ 未配置Server酱SendKey，跳过微信推送');
-    console.warn('💡 获取SendKey步骤:');
-    console.warn('   1. 访问 https://sct.ftqq.com/');
-    console.warn('   2. 微信扫码登录');
-    console.warn('   3. 点击 Key&API 获取SendKey');
-    console.warn('   4. 填入 .env 文件的 SERVERCHAN_SENDKEY');
+    console.error('❌ 未配置Server酱SendKey');
+    console.error('💡 GitHub Actions配置:');
+    console.error('   在GitHub仓库 Settings → Secrets and variables → Actions');
+    console.error('   添加 Secret: SERVERCHAN_SENDKEY');
+    console.error('');
+    console.error('💡 本地配置:');
+    console.error('   在 .env 文件中配置 SERVERCHAN_SENDKEY');
     return;
   }
+
+  console.log(`📤 正在推送消息到Server酱...`);
+  console.log(`SendKey: ${sendKey.substring(0, 10)}...`);
 
   // 使用新的API地址
   const url = `https://sctapi.ftqq.com/${sendKey}.send`;
@@ -86,10 +91,14 @@ async function serverChanPush(title, content) {
 
     const result = await response.json();
 
+    console.log(`📡 Server酱响应:`, JSON.stringify(result));
+
     if (result.code === 0) {
       console.log('✅ 微信推送成功 (Server酱)');
+      console.log(`📌 推送ID: ${result.data.pushid}`);
     } else {
       console.error('❌ 微信推送失败:', result.message);
+      console.error(`📌 错误码: ${result.code}`);
     }
   } catch (error) {
     console.error('❌ 微信推送异常:', error.message);
